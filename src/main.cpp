@@ -17,6 +17,7 @@ Changes:
     -updated fragment shader to recieve color from vertex shader (abandoned uniform)
     -Added wall collisions 
     -removed camera system (panning and zooming)
+    -changed grid initialisation 
     
 */
 
@@ -69,13 +70,13 @@ int main() {
     // Create the grid once at the start
     glm::vec2 positions[n*n];
     
-    float spacing = 0.1f;
+    
     int index = 0;
     
-    for (int y = 0; y < n; y += 1) {
-        for (int x = 0; x < n; x += 1) {
-            float x_pos = -1+ 2*(x/(float)n);
-            float y_pos = -1+ 2*(y/(float)n);
+    for (int y = 1; y <= n; y += 1) {
+        for (int x = 1; x <= n; x += 1) {
+            float x_pos = (-1 - 1/(float)n) + (2*x)/(float)n;
+            float y_pos = (-1 - 1/(float)n) + (2*y)/(float)n;
             positions[index++] = glm::vec3(x_pos, y_pos,0);
         }
     }
@@ -242,6 +243,7 @@ int main() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+        
     }
 
     float avg = fps/(float) count;

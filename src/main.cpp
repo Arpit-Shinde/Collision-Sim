@@ -2,13 +2,22 @@
 
 /*
 
-Version 1.0
+Version 2.0
 
 Description : 
     -Basic implementation of particle collision simulation
     -Naive O(n²) time complexity for collision detection
-    -individual draw calls for each particles (n*n calls)
-    -camera system for panning and zooming
+
+Improvements made:
+    -Switched to instanced rendering (1 draw call for all particles)
+     
+    
+Changes:
+    -updated vertex shader to recieve pos, color and offset
+    -updated fragment shader to recieve color from vertex shader (abandoned uniform)
+    -Added wall collisions 
+    -removed camera system (panning and zooming)
+    
 */
 
 #include <glad/glad.h>
@@ -24,138 +33,112 @@ Description :
 
 
 
-int res = 15; //resolution for the circle. more res, more round.
-int n = 20; //number of particles
+int resolution = 15; //resolution for the circle. more res, more round.
+int n = 20; //number of particles = n*n.
+float radius =0.03f;
+const float restitution = 1.0f;
 
-void processinput(GLFWwindow* window, glm::vec3 &cameraPos, glm::vec3 &cameraTarget);//process user input for panning and zooming
-
-struct Circle{
-    float radius;
-    glm::vec3 position;
-    int resolution;
-    std::vector <float> vertices;
-    glm::vec4 color;
-    unsigned int transLoc;
-    unsigned int colorLoc;
-    unsigned int viewLoc;
-    unsigned int projLoc;
-    unsigned int shaderProgram;
-
-
-    Circle(float r, glm::vec3 v, int res, glm::vec4 col,unsigned int s ){
-        radius = r;
-        position = v;
-        resolution = res;
-        color = col;
-        shaderProgram = s;
-    };
-
-    unsigned int create(){
-
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-
-        for (int i = 0; i <= resolution; i++) {
-            float angle = i * 2.0f * std::numbers::pi_v<float> / resolution;
-
-            vertices.push_back(radius* std::cos(angle));
-            vertices.push_back(radius* std::sin(angle));
-            vertices.push_back(0.0f);
-        }
-
-        unsigned int myVAO;
-        glGenVertexArrays(1, &myVAO);
-        glBindVertexArray(myVAO); 
-
-        unsigned int myVBO;
-        glGenBuffers(1, &myVBO);
-        
-
-        glBindBuffer(GL_ARRAY_BUFFER, myVBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        
-        glEnableVertexAttribArray(0);
-
-        glBindVertexArray(0);
-
-        transLoc = glGetUniformLocation(shaderProgram, "trans");
-        colorLoc = glGetUniformLocation(shaderProgram, "in_color");
-        viewLoc = glGetUniformLocation(shaderProgram, "view");
-        projLoc = glGetUniformLocation(shaderProgram, "projection");
-        return myVAO;
-    }
-
-    void draw(unsigned int vao,glm::mat4 trans, glm::mat4 view, glm::mat4 projection){
-        glBindVertexArray(vao);
-        glUniformMatrix4fv(transLoc, 1, GL_FALSE, value_ptr(trans));
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, value_ptr(projection));
-        glUniform4fv(colorLoc, 1, glm::value_ptr(color));
-        glDrawArrays(GL_TRIANGLE_FAN, 0, resolution + 2);
-    }
-};
+void processinput(GLFWwindow* window);//process user input
 
 int main() {
     GLFWwindow* window = init_window();
 
     unsigned int shaderProgram = linkShaders();
 
-    //init particles
-    std::vector <Circle> particles (n*n, Circle(0.02f, glm::vec3(0.1f,0.0f,0.0f), res, glm::vec4(1.0,1.0,0.0,1.0), shaderProgram));
+    //generate Base Circle Vertices (Centered at 0,0,0)
+    std::vector<float> vertices;
+    
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f); //color of the particles (center)
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
 
-    int count = 0;
+    for (int i = 0; i <= resolution; i++) {
+        float angle = i * 2.0f * std::numbers::pi_v<float> / resolution;
 
-    float spacing = 0.10f;
+        vertices.push_back(radius* std::cos(angle));
+        vertices.push_back(radius* std::sin(angle));
+        vertices.push_back(0.0f);
+        vertices.push_back(1.0f); //color of the particles
+        vertices.push_back(1.0f);
+        vertices.push_back(1.0f);
+    }
 
-    //initialise a grid arrangement of particles
-    for (int y = 0; y < n; y++) {
-        for (int x = 0; x < n; x++) {
-            particles[count].position = glm::vec3(
-                -1+ 2*(x/(float)n),
-                -1+ 2*(y/(float)n),
-                0.0f
-            );
-            count++;
+    // Create the grid once at the start
+    glm::vec2 positions[n*n];
+    
+    float spacing = 0.1f;
+    int index = 0;
+    
+    for (int y = 0; y < n; y += 1) {
+        for (int x = 0; x < n; x += 1) {
+            float x_pos = -1+ 2*(x/(float)n);
+            float y_pos = -1+ 2*(y/(float)n);
+            positions[index++] = glm::vec3(x_pos, y_pos,0);
         }
     }
 
+    
+    unsigned int instanceVBO;
+    glGenBuffers(1, &instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    //Use GL_DYNAMIC_DRAW because we will update positions every frame
+    glBufferData(GL_ARRAY_BUFFER,sizeof(glm::vec2)*n*n, &positions[0], GL_STATIC_DRAW); 
+    glBindBuffer(GL_ARRAY_BUFFER,0);
 
 
-    //init particle vaos
-    std::vector <unsigned int> particle_vaos;
+    
+    unsigned int VAO, geometryVBO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
 
-    for (auto& x : particles){
-        particle_vaos.push_back(x.create());
-    }
+    glGenBuffers(1, &geometryVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, geometryVBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+
+    
+    
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(2, 1);
+    glBindVertexArray(0);
 
 
 
 
     //random velocities
-    std::vector <glm::vec3> velocities;
+    std::vector <glm::vec2> velocities;
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution <float> random_vel(-0.9f,0.9f); //set the initial random velocities here
+    std::uniform_real_distribution <float> random_vel(-0.2f,0.2f); //set the initial random velocities here
 
     for (int i = 0;i<n*n;i++){
-        velocities.push_back(glm::vec3(random_vel(gen), random_vel(gen),0));
+        velocities.push_back(glm::vec2(random_vel(gen), random_vel(gen)));
     }
 
     
     float prev_time = 0;
     double lastTime = glfwGetTime();
     int frames = 0;
+    int count=0;
+    int fps=0;
 
-    glm::vec3 cameraPos    = glm::vec3(0.0f, 0.0f, 2.5f); 
-    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f); 
-    glm::vec3 upVector     = glm::vec3(0.0f, 1.0f, 0.0f); 
 
     while (!glfwWindowShouldClose(window)){
 
-        processinput(window, cameraPos, cameraTarget);
+        if (count==60) break;
+
+        processinput(window);
 
         float time = glfwGetTime();
         float dt = time - prev_time;
@@ -167,8 +150,10 @@ int main() {
 
         if (time - lastTime >= 1.0){
             std::cout << "FPS: " << frames << std::endl;
+            fps+=frames;
             frames = 0;
             lastTime = time;
+            count++;
         }
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -176,63 +161,91 @@ int main() {
 
         glUseProgram(shaderProgram);
 
-        glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, upVector);
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
-
-        
+        //check collision
 
         for (int i = 0; i < n*n; i++) {
+
+            // Lower wall (y = -1)
+            if (positions[i].y - radius < -1.0f) {
+                positions[i].y = -1.0f + radius;  // Snap to surface
+                velocities[i].y = -velocities[i].y * restitution;
+            }
+
+            // Upper wall (y = 1)
+            if (positions[i].y + radius > 1.0f) {
+                positions[i].y = 1.0f - radius;   // Snap to surface
+                velocities[i].y = -velocities[i].y * restitution;
+            }
+
+            // Left wall (x = -1)
+            if (positions[i].x - radius < -1.0f) {
+                positions[i].x = -1.0f + radius;  // Snap to surface
+                velocities[i].x = -velocities[i].x * restitution;
+            }
+
+            // Right wall (x = 1)
+            if (positions[i].x + radius > 1.0f) {
+                positions[i].x = 1.0f - radius;   // Snap to surface
+                velocities[i].x = -velocities[i].x * restitution;
+            }
+            //check collision with other particles
             for (int j = i + 1; j < n*n; j++) {
 
-                glm::vec3 delta = particles[i].position - particles[j].position;
+                glm::vec2 delta = positions[i] - positions[j];
 
                 float dist = glm::length(delta);
                 
-                float minDist = particles[i].radius + particles[j].radius;
+                float minDist = 2*radius; //assuming simulation for identical bodies
                 
 
-                if (dist < minDist && dist > 0.00001f) { //the later condition is to avoid normalizing a zero length vector  
-                    glm::vec3 n = glm::normalize(delta);
+                if (dist < minDist && dist > 0.00001f) { //the later condition is to avoid normalizing a zero length vector 
+                    
+                    glm::vec2 n = glm::normalize(delta);
 
                     float v1n = glm::dot(velocities[i], n);
                     float v2n = glm::dot(velocities[j], n);
 
-                    glm::vec3 v1t = velocities[i] - v1n * n;
-                    glm::vec3 v2t = velocities[j] - v2n * n;
+                    glm::vec2 v1t = velocities[i] - v1n * n;
+                    glm::vec2 v2t = velocities[j] - v2n * n;
 
                     // Exchange the normal components
-                    velocities[i] = v1t + v2n * n;
-                    velocities[j] = v2t + v1n * n;
+                    velocities[i] = v1t + (v1n + (1 + restitution) * (v2n - v1n) * 0.5f) * n;
+                    velocities[j] = v2t + (v2n + (1 + restitution) * (v1n - v2n) * 0.5f) * n;
 
                     float penetration = minDist - dist; 
                     
 
-                    particles[i].position += n * (penetration*0.5f);//in case of overlap, seperate them completely 
-                    particles[j].position -= n * (penetration*0.5f);
+                    positions[i] += n * (penetration*0.5f);//in case of overlap, seperate them completely 
+                    positions[j] -= n * (penetration*0.5f);
                 }
             }
         }
-        
-
-
-
 
         for (int i = 0;i<n*n;i++){
-            particles[i].position +=velocities[i]*dt; //update their positions. verlet integration is advised. 
-                                                        //but for now, euler integration works fine
+            positions[i] +=velocities[i]*dt;
             
         }
 
-        
+        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 
-        for (int i = 0;i<n*n;i++){
-            glm::mat4 trans = glm::translate(glm::mat4(1.0f), particles[i].position); 
-            particles[i].draw(particle_vaos[i], trans, view, projection); //draw the particle
-        }
+        glBufferSubData(
+            GL_ARRAY_BUFFER,
+            0,
+            sizeof(glm::vec2) * n*n,
+            positions
+        );
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glBindVertexArray(VAO);
+        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, resolution+2, n*n);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    float avg = fps/(float) count;
+    std::cout<<"\n---------\navg fps = "<<avg<<"\n"; 
 
     
     glfwTerminate();
@@ -242,35 +255,8 @@ int main() {
 }
 
 
-void processinput(GLFWwindow* window, glm::vec3 &cameraPos, glm::vec3 &cameraTarget){
-    float cam_speed = 0.002;
+void processinput(GLFWwindow* window){
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
-    }
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-        cameraPos.y+=cam_speed;
-        cameraTarget.y+=cam_speed;
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-        cameraPos.y-=cam_speed;
-        cameraTarget.y-=cam_speed;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-        cameraPos.x-=cam_speed;
-        cameraTarget.x-=cam_speed;
-    }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-        cameraPos.x+=cam_speed;
-        cameraTarget.x+=cam_speed;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-        cameraPos.z+=cam_speed;
-        cameraTarget.z+=cam_speed;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-        cameraPos.z-=cam_speed;
-        cameraTarget.z-=cam_speed;
     }
 }

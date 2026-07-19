@@ -1,4 +1,4 @@
-//standard shaders with no instancing
+//standard shaders with instancing
 
 #pragma once
 #include <glad/glad.h>
@@ -8,30 +8,28 @@ const char* vertexShaderSource = R"(
     #version 330 core
 
     layout (location = 0) in vec3 vertex_coords;
+    layout (location=1) in vec3 acolor;
+    layout (location=2) in vec3 offset;
     
-
+    out vec3 fColor;
     
-    
-    uniform mat4 trans;
-    uniform mat4 view;
-    uniform mat4 projection;
 
     void main() {
-        
-        gl_Position = projection * view * trans * vec4(vertex_coords,1.0);
-        
-        
+
+        gl_Position = vec4(vertex_coords + offset,1.0);
+        fColor = acolor;
+             
     }
 )";
 
 const char* fragmentShaderSource = R"(
     #version 330 core
     
-    
     out vec4 FragColor;
-    uniform vec4 in_color;
+    in vec3 fColor;
+    
     void main() {
-        FragColor = vec4(in_color); 
+        FragColor = vec4(fColor,1.0); 
     }
 )";
 

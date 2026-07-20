@@ -7,7 +7,7 @@ An **OpenGL** based 2D particle (circles) simulator which simulates real-time co
 *   **Configurable Simulation Parameters:** Allows user to configure number of particles, radius of particles, coefficient of restitution and the resolution of particle.
 
 ##  Technical Details
-*   **Collision Detection:** Implemented using a naive $O(n^2)$ algorithm.
+*   **Collision Detection:** Implemented using spatial grid having roughly $O(n)$ time complexity for uniform distribution.
 *   **Integration:** Euler integration.
 *   **Rendering:** Instanced rendering using `glDrawArraysInstanced`. (Single draw call for all particles)
 *   **Initialisation:** Particles are initialised on a grid with random velocities (adjustable range)

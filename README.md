@@ -1,5 +1,5 @@
 # Collision Simulator
-An **OpenGL** based 2D particle (circles) simulator which simulates real-time collisions amongst identical particles. 
+An **OpenGL** based GPU accelerated 2D particle (circles) simulator which simulates real-time collisions amongst identical particles. 
 
 
 ##  Features
@@ -11,6 +11,10 @@ An **OpenGL** based 2D particle (circles) simulator which simulates real-time co
 *   **Integration:** Euler integration.
 *   **Rendering:** Instanced rendering using `glDrawArraysInstanced`. (Single draw call for all particles)
 *   **Initialisation:** Particles are initialised on a grid with random velocities (adjustable range)
+*   **GPGPU** Implemented Compute shaders for GPU parallelism 
+
+##  Architecture Document
+To understand the architecture of this project, read the  **[Architecture Document](https://github.com/Arpit-Shinde/Collision-Sim)**.
 
 
 ##  How to Build
@@ -25,7 +29,3 @@ This will clone this repository. Once done, open the folder `Collision-Sim` in V
 g++ -std=c++23 src/main.cpp src/glad.c -o src/main.exe -Iinclude -Llib -lglfw3 -lopengl32 -lgdi32 ; src/main.exe
 ``` 
 in the terminal. Make sure the terminal is open in the folder `Collision-Sim` only. Build commands supported for Windows only.
-
-
-
-

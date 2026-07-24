@@ -19,3 +19,9 @@ GLFWwindow* init_window(){
     return return_window;
 }
 
+void processinput(GLFWwindow* window){
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+        glfwSetWindowShouldClose(window, true);
+    }
+}
+

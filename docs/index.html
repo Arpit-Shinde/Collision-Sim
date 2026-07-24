@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatial Grid Optimization in Collision Simulation</title>
+    
+    <!-- MathJax for rendering LaTeX formulas in the browser -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    /* Relaxed Light Documentation CSS */
+    :root {
+        --bg-color: #f4f4f9;       /* Soft light gray background */
+        --card-bg: #ffffff;       /* Pure white card */
+        --text-main: #333333;     /* Dark gray (easier on eyes than pure black) */
+        --text-heading: #111111;  /* Near-black headings */
+        --accent-color: #007777;  /* Professional calm blue */
+        --border-color: #dddddd;  /* Subtle gray border */
+        --code-bg: #f8f8f8;       /* Very light code background */
+    }
+
+    body {
+        font-family: "Inter";
+        line-height: 1.7;
+        color: var(--text-main);
+        background-color: var(--bg-color);
+        margin: 0;
+        padding: 40px 20px;
+    }
+
+    article {
+        max-width: 850px;
+        margin: 0 auto;
+        background-color: var(--card-bg);
+        padding: 50px 60px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Softer shadow */
+        border: 1px solid var(--border-color);
+    }
+
+    h1 {
+        color: var(--text-heading);
+        font-size: 2.2em;
+        margin-bottom: 0.2em;
+        line-height: 1.3;
+        letter-spacing: -0.5px;
+    }
+
+    .metadata {
+        font-size: 0.9em;
+        color: #666666; /* Muted text for metadata */
+        margin-bottom: 3em;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+    }
+
+    h2 {
+        color: var(--text-heading);
+        font-size: 1.5em;
+        margin-top: 2em;
+        margin-bottom: 1em;
+        display: flex;
+        align-items: center;
+    }
+
+    h2::before {
+        content: "";
+        display: inline-block;
+        width: 4px;
+        height: 24px;
+        background-color: var(--accent-color);
+        margin-right: 12px;
+        border-radius: 2px;
+    }
+
+    h3 {
+        color: var(--accent-color);
+        font-size: 1.1em;
+        margin-top: 1.8em;
+        margin-bottom: 0.8em;
+        font-family: "Consolas", "Courier New", monospace;
+    }
+
+    p {
+        margin-bottom: 1.2em;
+    }
+
+    .figure {
+        text-align: center;
+        margin: 2.5em 0;
+        background-color: var(--code-bg);
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .figure img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+
+    .figure figcaption {
+        font-size: 0.9em;
+        margin-top: 15px;
+        color: #777777;
+    }
+
+    ul {
+        margin-bottom: 1.5em;
+        padding-left: 20px;
+        list-style-type: disc;
+    }
+
+    li {
+        margin-bottom: 0.6em;
+    }
+    
+    li::marker {
+        color: var(--accent-color);
+    }
+
+    code {
+        font-family: "Fira Code", "Consolas", monospace;
+        background-color: #eeeeee;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        color: #000000; /* Soft pinkish-red for code emphasis */
+        border: 1px solid #e0e0e0;
+    }
+    
+    .math-display {
+        background-color: var(--code-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 1.5em 0;
+        overflow-x: auto;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        article {
+            padding: 30px 20px;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <article>
+        <h1>Spatial Grid & Compute Shader</h1>
+        <div class="metadata">
+            <p>24 July 2026</p>
+        </div>
+
+        <h2>1. The \(\text{ }\mathcal{O}(n^2)\text{ } \) Bottleneck</h2>
+        <p>In simulation of \(N\) number of particles, it takes \(\frac{N(N-1)}{2}\) number of collision checks. This is brute force, but can be optimised using the fact that for each frame, we need to check collision of a particle with its neighbours only. We can avoid checking collision between two particles if they are far enough.</p>
+
+        <h2>2. Spatial Partitioning & Mapping</h2>
+        <p>Arranging the particles in a \(n \times n\) grid so that \(N = n \times n\), the space is divided into a grid of cells as shown in the figure.</p>
+
+        <figure class="figure">
+            <!-- Replace 'image_92138a.png' with the actual path to your image when hosting -->
+            <img src="spatialgrid_black.png">
+            <figcaption>Figure 1: A spatial grid divided into cells.</figcaption>
+        </figure>
+
+        <p>The length of each cell is kept equal to the diameter of a particle for best results of the algorithm. Let the space span \(g \times g\) number of cells. For instance, above space spans total of \(1 6\) cells.</p>
+        
+        <p>For each cell, an id is assigned (mentioned in the corner of each cell in the figure). Similarly for each particle, an id is calculated. The particle's id determines which cell it belongs to. For instance, particle with id \(3\) will be assigned to cell which has id \(3\).</p>
+
+        <p>The id of a particle having center \((x, y)\) is given as</p>
+        
+        <div class="math-display">
+            $$ID = floor(X) + g \times floor(Y) + \frac{g(g+1)}{2}$$
+        </div>
+
+        <p>Where \(X = \frac{gx}{2}\) and \(Y = \frac{gy}{2}\).</p>
+
+        <p>The additional \(\frac{g(g+1)}{2}\) is because the origin is present at the middle of screen rather than bottom left corner.</p>
+
+        <h2>3. Memory Management & Data Structures</h2>
+        <p>An array called <code>positions</code> stores the center of all particles. An array called <code>velocities</code> stores the velocities of all particles.</p>
+        
+        <p>An array called <code>grid</code> stores the groups of particles formed based on their id. Specifically, <code>grid[i]</code> is another list which stores the data <b>ParticleReference</b> of particle whose id is \(i\). This ParticleReference consist of coordinates x and y, the index from <code>positions</code> of particle, and its id.</p>
+        
+        <p>An array called <code>capacities</code> stores the number of particles present in each cell. Specifically, <code>capacities[i]</code> is the length of <code>grid[i]</code>.</p>
+
+        <p><b>To improve performance, these arrays are flat (1d) and preallocated. Positions has initial positions of particles arranged in a grid. Velocities has random data (for random start of each particle). Grid has lists initialised with</b> <code>max_particles_per_cell</code> <b>number of ParticleReferences {0,0,0,0}.</b></p>
+        
+        <p>Since there are \(g^2\) number of cells, the total length of grid is </p>
+        
+        <div class="math-display">
+            \(g^2 \times\) <code>max_particles_per_cell</code> \(\times\) <code>sizeof(ParticleReference)</code>
+        </div>
+
+        
+
+        <h2>4. GPU Architecture & std430 Alignment</h2>
+        <p>While CPU is good for considerable number of particles, it still hits bottlenecks when we increase \(N\) to a very large number, such as \(40,000\). For this reason, GPGPU is employed through compute shaders to take advantage of parallelism of GPU.</p>
+
+        <p>The data lives in the special memory of GPU called <b>Shader Storage Buffer Objects (SSBO)</b>. The GPU can read and write into this SSBO, which eliminates the bottleneck of sending all the data to GPU for rendering each frame as well as lets the GPU modify data present inside SSBO.</p>
+
+        <p>The std430 rules restrict the data to have sizes that are multiples of their largest member's base alignment. In our case, our ParticleReference is of 16 bytes.That means all of our arrays must contain 16 bytes of data for each element. For data such as capacities (having single integer, so 4 bytes), we add explicit padding to make overall size of its elements to be 16 bytes. Its just for making the data agree std430 rules. This padding is done for all structures we use for rendering (such as vertex data) as well as physics data.</p>
+
+        <h2>5. Simulation Loop</h2>
+        <p>Compute shader is basically a program that lives in GPU instead of CPU. For each frame, three compute shaders are used.</p>
+
+        <h3>assign_compute_shader</h3>
+        <ul>
+            <li>loops through "particles", calculate their id, and puts the ParticleReference of it in grid[id] list.</li>
+            <li>Increments capacities[id]</li>
+            <li>Checks wall collision</li>
+            <li>Accordingly, updates the velocities array (for wall collisions only)</li>
+        </ul>
+
+        <h3>resolve_compute_shader</h3>
+        <ul>
+            <li>Loops through particles, again finds the id of particle</li>
+            <li>Generates the neighbour cells ids for each particle (cells which surround the cell of particle. for example, if we are checking particle whose id is \(4\), then the neighbour cell ids for it are \( 0,1,5,8,9\)) and checks the collision of particle with all particles present in the neighbour cells.</li>
+            <li>Accordingly, updates the velocities array. (for particle-particle collisions only)</li>
+            <li>Note that once a particle is checked, it is not considered as a neighbour particle for next iterations</li>
+        </ul>
+
+        <h3>integrate_compute_shader</h3>
+        <ul>
+            <li>Reads the positions and velocities array and updates the positions array using euler integration</li>
+        </ul>
+
+        <h2>6. Rendering</h2>
+
+        <p>Instanced rendering is implemented to replace \(N\) number of draw calls for \(N\) number of particles to \(1\) draw call for the same particles.
+
+        The vertex shader recieves the base vertices of a circle and positions array. Based on this, it processes those vertices.
+        It also recieves the velocity array so that it can determine the color of particle based on its speed. This color varies on a spectrum whose end colors are defined by us. It is then sent to fragment shader. This color mapping is done to derive a meaningful information about the simulation.</p>
+        
+
+        <h2>7. A bit more technical</h2>
+            <ul>
+                <li>If \(X\) and \(Y\) in the id formula are strictly equal to \(\frac{g}{2}\), they are explicitly set equal to \(\frac{g}{2}-1 \). Else the id becomes greater than number of cells.</li>
+            </ul>
+                    
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin-top: 3em; margin-bottom: 2em;">
+
+        <footer style="font-style: italic; color: #666; font-size: 0.9em; text-align: center;">
+            <p><strong>Note:</strong> This article was written from an active learning perspective of a student learning GPGPU physics simulations. Please excuse any technical or typographical oversights.</p>
+        </footer>
+
+        <footer class="footer">
+        <div class="footer-content">
+            
+
+            <!-- Your Links -->
+            <nav class="footer-links">
+                <span>•</span>
+                <a href="https://github.com/Arpit-Shinde/Collision-Sim">GitHub Repository</a>
+                <span>•</span>
+                <a href="https://www.linkedin.com/in/arpit-shinde-b64542421/">LinkedIn</a>
+            </nav>
+
+            <!-- Copyright -->
+            <p class="copyright">
+                &copy; 2026 Arpit Shinde. All rights reserved.
+            </p>
+        </div>
+    </footer>
+    </article>
+
+</body>
+</html>  is it good now?

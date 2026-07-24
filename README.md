@@ -14,7 +14,7 @@ An **OpenGL** based GPU accelerated 2D particle (circles) simulator which simula
 *   **GPGPU** Implemented Compute shaders for GPU parallelism 
 
 ##  Architecture Document
-To understand the architecture of this project, read the  **[Architecture Document](https://github.com/Arpit-Shinde/Collision-Sim)**.
+To understand the architecture of this project, read the  **[Architecture Document](https://arpit-shinde.github.io/Collision-Sim/)**.
 
 
 ##  How to Build

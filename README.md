@@ -70,26 +70,5 @@ cmake --build .
 ### Running the Project
 Once the build is complete, you will find the executable `Collsion_Sim.exe` inside your build directory. You can launch it by double-clicking the file, or run it directly from your terminal.
 
-## Performance Benchmarks
 
-### Test Configuration
-- **CPU**: [Your CPU model]
-- **RAM**: [Your RAM size/speed]
-- **OS**: Windows 11/Linux/macOS
-- **OpenGL Version**: [Your version]
-- **Resolution**: 1920x1080
-- **Simulation Duration**: 60 seconds
-- **Coefficient of Restitution**: 1.0 (elastic)
-- **Particle Radius**: [Your value]
-
-### Performance Metrics
-
-| GPU | Particle Count | Avg. FPS | Frame Time (ms) | Throughput (collisions/sec) |
-|-----|---------------|----------|-----------------|----------------------------|
-| **NVIDIA RTX 3050** (Dedicated) | 40,000 | **270** | ~3.7 ms | [Calculate: 40K × collisions] |
-| **Intel UHD Graphics** (Integrated) | 40,000 | **100** | ~10.0 ms | [Calculate] |
-| **NVIDIA RTX 3050** | 20,000 | **~500+** | ~2.0 ms | - |
-| **Intel UHD Graphics** | 20,000 | **~180** | ~5.5 ms | - |
-
-### Performance Scaling
 

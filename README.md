@@ -27,7 +27,7 @@ To understand the architecture of this project, read the  **[Architecture Docume
 Click the green `Code` button and copy the HTTPS URL. Open a folder in VS Code and run the following command in the terminal:
 
 ```bash
-git clone [https://github.com/Arpit-Shinde/Collision-Sim.git](https://github.com/Arpit-Shinde/Collision-Sim.git)
+git clone [https://github.com/Arpit-Shinde/Collision-Sim.git](https://arpit-shinde.github.io/Collision-Sim/)
 ```
 
 This will clone the repository. Once done, open the `Collision-Sim` folder in VS Code (`Ctrl+K+O`).

@@ -22,6 +22,17 @@
         --code-bg: #f8f8f8;       /* Very light code background */
     }
 
+    /* --- Dark Mode Variables --- */
+    [data-theme="dark"] {
+        --bg-color: #121212;       /* Deep dark background */
+        --card-bg: #1e1e1e;        /* Slightly lighter card */
+        --text-main: #e0e0e0;      /* Soft white text */
+        --text-heading: #ffffff;   /* Pure white for headings */
+        --accent-color: #4fd1c5;   /* Brighter cyan/teal for contrast */
+        --border-color: #333333;   /* Dark gray borders */
+        --code-bg: #2a2a2a;        /* Darker code blocks */
+    }
+
     body {
         font-family: "Inter";
         line-height: 1.7;
@@ -97,6 +108,11 @@
         border: 1px solid var(--border-color);
     }
 
+    /* Ensure black-lined transparent diagrams remain visible in dark mode */
+    [data-theme="dark"] .figure {
+        background-color: #e5e5e5;
+    }
+
     .figure img {
         max-width: 100%;
         height: auto;
@@ -142,6 +158,27 @@
         overflow-x: auto;
     }
 
+    /* --- Theme Toggle Button Styling --- */
+    .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        font-size: 1.2em;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 30px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease, background 0.2s ease;
+        z-index: 1000;
+    }
+
+    .theme-toggle:hover {
+        transform: scale(1.1);
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         article {
@@ -151,6 +188,10 @@
 </style>
 </head>
 <body>
+
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">
+        🌓
+    </button>
 
     <article>
         <h1>Spatial Grid & Compute Shader</h1>
@@ -272,5 +313,31 @@
     </footer>
     </article>
 
+    <script>
+        const toggleButton = document.getElementById('theme-toggle');
+
+        // 1. Check if the user previously saved a theme preference
+        const currentTheme = localStorage.getItem('theme');
+
+        // 2. Apply saved theme, or check system preference if no save exists
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        // 3. Handle the button click
+        toggleButton.addEventListener('click', () => {
+            let theme = document.documentElement.getAttribute('data-theme');
+            
+            if (theme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    </script>
 </body>
-</html>  is it good now?
+</html>

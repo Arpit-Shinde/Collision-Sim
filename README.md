@@ -24,10 +24,10 @@ To understand the architecture of this project, read the  **[Architecture Docume
 
 ## How to Build
 
-Click the green `Code` button and copy the HTTPS URL. Open a folder in VS Code and run the following command in the terminal:
+Click the green `Code` button and copy the HTTPS URL. Open a folder in VS Code and run the following command in the terminal (make sure to have git installed):
 
 ```bash
-git clone [https://github.com/Arpit-Shinde/Collision-Sim.git](https://github.com/Arpit-Shinde/Collision-Sim.git)
+git clone https://github.com/Arpit-Shinde/Collision-Sim.git
 ```
 
 This will clone the repository. Once done, open the `Collision-Sim` folder in VS Code (`Ctrl+K+O`).
@@ -40,7 +40,7 @@ Run the following command (make sure your terminal is open in the `Collision-Sim
 winget install Kitware.CMake
 ```
 
-*Note: Make sure to also install the **CMake Tools** extension in VS Code.*
+*Note: Reopen VS Code after running this command*
 
 ### Compiling the Project
 

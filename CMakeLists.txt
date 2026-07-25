@@ -14,7 +14,7 @@ add_executable(Collision_Sim
     src/geometry.cpp
     src/shader.cpp
     src/glad.c
-    src/gpu_config.cpp # keep it as it is if testing on dedicated graphics card is required else remove if testing on integrated graphics card is required
+    # src/gpu_config.cpp # keep it as it is if testing on integrated graphics card is required else uncomment this whole line if testing on dedicated graphics card is required
 )
 
 # need opengl32 for Windows, and glfw3 for GLFW

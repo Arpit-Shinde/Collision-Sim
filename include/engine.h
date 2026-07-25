@@ -1,27 +1,9 @@
 #pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
 
-GLFWwindow* init_window(){
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow* return_window = glfwCreateWindow(1000, 1000, "CollisionSim", NULL, NULL);
-    glfwMakeContextCurrent(return_window);
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    glEnable(GL_DEPTH_TEST); 
-    glEnable(GL_BLEND);//to enable alpha opacity
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //to enable alpha opacity
+GLFWwindow* init_window();
+
+void processinput(GLFWwindow* window);
     
-
-    return return_window;
-}
-
-void processinput(GLFWwindow* window){
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
-        glfwSetWindowShouldClose(window, true);
-    }
-}
 

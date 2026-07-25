@@ -1,4 +1,3 @@
-#pragma once
 #include <glad/glad.h>
 #include <iostream>
 
@@ -24,7 +23,7 @@ const char* vertexShaderSource = R"(
 
     out vec4 fColor;
 
-    float max_velocity = sqrt(2)*0.05f;
+    
 
     void main() {
         Vertex v = base_vertices[gl_VertexID];
@@ -35,6 +34,7 @@ const char* vertexShaderSource = R"(
 
         vec2 vel = velocities[gl_InstanceID].xy;
         float velocity = length(vel); // Using length() is cleaner than manual sqrt/sum
+        float max_velocity = sqrt(2)*velocities[gl_InstanceID].w;
 
         float t = clamp(velocity / max_velocity, 0.0, 1.0);
 

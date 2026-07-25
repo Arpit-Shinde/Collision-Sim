@@ -34,27 +34,26 @@ key takeaways : 1. assigning struct data to variables in glsl is not as same as 
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <shaders/shader.h>
-#include <engine.h>
+#include "shader.h"
+#include "engine.h"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <bits/stdc++.h>
 #include <random>
-#include <geometry.h>
+#include "geometry.h"
+#include <fstream>
+#include <sstream>
 
 int resolution = 150; //resolution for the circle. more res, more round.
-int n = 5; //number of particles = n*n.
-float radius = 0.02; //recommended radius = 1/n for compact square packing
+int n = 20; //number of particles = n*n.
+float radius = 1/((float) 2*n); //recommended radius = 1/n for compact square packing
 float restitution = 1.0f;
 int g = int(1/radius); //number of cells = g*g
 std::vector <float> color = {1.0,0.0,1.0};
-std::vector <float> max_velocities_range = {-0.05f,0.05f};
 int max_particles_per_cell = (n*n)/(g*g) + 100;
-
-
-
+float max_velocity = 10/(float) n;
 
 int main() {
     GLFWwindow* window = init_window();
@@ -68,7 +67,7 @@ int main() {
     std::vector <Vertex> vertices = get_base_vertices(resolution, color, radius);
 
     std::vector <OffsetVertex> positions = generate_initial_positions(n);
-    std::vector <Velocity> velocities = generate_random_velocities(max_velocities_range[0],max_velocities_range[1],n);
+    std::vector <Velocity> velocities = generate_random_velocities(max_velocity,n);
 
     std::vector <ParticleReference> grid(g*g*max_particles_per_cell);
     std::vector<Capacity> capacities(g*g,{0,0,0,0});
@@ -120,14 +119,26 @@ int main() {
     int count=0; //to track average fps
     int fps = 0;
 
-    const GLubyte* version = glGetString(GL_VERSION);
-    std::cout<<version;
-
+    std::cout << "==================================================\n";
+    std::cout << " Collision Simulator v4.0\n";
+    std::cout << "--------------------------------------------------\n";
+    std::cout << " System Info:\n";
+    std::cout << " - OpenGL Version: " << glGetString(GL_VERSION) << "\n";
+    std::cout << " - Renderer: " << glGetString(GL_RENDERER) << "\n";
+    std::cout << "--------------------------------------------------\n";
+    std::cout << " Simulation Info:\n";
+    std::cout << " - Number of particles: " << n*n << "\n";
+    std::cout << " - Resolution: " << resolution << "\n";
+    std::cout << "--------------------------------------------------\n";
+    std::cout << " Controls:\n";
+    std::cout << " - [ESC] to Exit\n";
+    std::cout << "==================================================\n";
+    
     while (!glfwWindowShouldClose(window)){
 
-        // if (count==60){ //stop animation after 60
-        //     break;
-        // }
+        if (count==60){ //stop animation after 60
+            break;
+        }
 
         processinput(window);
 
@@ -191,8 +202,13 @@ int main() {
 
     float avg = fps/(float) count;
     std::cout<<"\n---------\navg fps = "<<avg<<"\n"; 
+
+    
     
     glfwTerminate();
+
+    int garbage;
+    std::cin>>garbage;
 
 
     return 0;

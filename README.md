@@ -4,7 +4,10 @@ An **OpenGL** based GPU accelerated 2D particle (circles) simulator which simula
 
 ##  Features
 *   **Performance Metrics:** Real-time FPS counter displayed in the console, with average fps over a minute displayed at the end.
+*   **Color Coding:** Particles are mapped to a color based on their speed
 *   **Configurable Simulation Parameters:** Allows user to configure number of particles, radius of particles, coefficient of restitution and the resolution of particle.
+
+*Note : The data can be configured in* `app/main.cpp`
 
 ##  Technical Details
 *   **Collision Detection:** Implemented using spatial grid having roughly $O(n)$ time complexity for uniform distribution.
@@ -12,20 +15,81 @@ An **OpenGL** based GPU accelerated 2D particle (circles) simulator which simula
 *   **Rendering:** Instanced rendering using `glDrawArraysInstanced`. (Single draw call for all particles)
 *   **Initialisation:** Particles are initialised on a grid with random velocities (adjustable range)
 *   **GPGPU** Implemented Compute shaders for GPU parallelism 
+*   **Build System** Configured with CMake to handle dependency management across environments.
+*   **GPU Optimisation** To make use of dedicated graphics card, `src/gpu_config.cpp` must be added to `add_executable` list in `CMakeLists.txt`.
 
 ##  Architecture Document
-To understand the architecture of this project, read the  **[Architecture Document](https://arpit-shinde.github.io/Collision-Sim/)**.
+To understand the architecture of this project, read the  **[Architecture Document](https://github.com/Arpit-Shinde/Collision-Sim)**.
 
 
-##  How to Build
-Click the `code` button (green coloured) and copy the HTTPS URL. Open a folder in VS Code and run the command
+## How to Build
+
+Click the green `Code` button and copy the HTTPS URL. Open a folder in VS Code and run the following command in the terminal:
 
 ```bash
-git clone https://github.com/Arpit-Shinde/Collision-Sim.git
+git clone [https://github.com/Arpit-Shinde/Collision-Sim.git](https://github.com/Arpit-Shinde/Collision-Sim.git)
 ```
-This will clone this repository. Once done, open the folder `Collision-Sim` in VS Code (Ctrl+K+O) and run the command
+
+This will clone the repository. Once done, open the `Collision-Sim` folder in VS Code (`Ctrl+K+O`).
+
+### Installing CMake
+
+Run the following command (make sure your terminal is open in the `Collision-Sim` directory):
 
 ```bash
-g++ -std=c++23 src/main.cpp src/glad.c -o src/main.exe -Iinclude -Llib -lglfw3 -lopengl32 -lgdi32 ; src/main.exe
-``` 
-in the terminal. Make sure the terminal is open in the folder `Collision-Sim` only. Build commands supported for Windows only.
+winget install Kitware.CMake
+```
+
+*Note: Make sure to also install the **CMake Tools** extension in VS Code.*
+
+### Compiling the Project
+
+Now, open the terminal in the working directory and run the following command to create a build folder:
+
+```bash
+mkdir build
+```
+
+Navigate to the newly created build folder:
+
+```bash
+cd build
+```
+
+Configure the project by running:
+
+```bash
+cmake .. -G "MinGW Makefiles"
+```
+
+After completion, build the executable with:
+
+```bash
+cmake --build .
+```
+### Running the Project
+Once the build is complete, you will find the executable `Collsion_Sim.exe` inside your build directory. You can launch it by double-clicking the file, or run it directly from your terminal.
+
+## Performance Benchmarks
+
+### Test Configuration
+- **CPU**: [Your CPU model]
+- **RAM**: [Your RAM size/speed]
+- **OS**: Windows 11/Linux/macOS
+- **OpenGL Version**: [Your version]
+- **Resolution**: 1920x1080
+- **Simulation Duration**: 60 seconds
+- **Coefficient of Restitution**: 1.0 (elastic)
+- **Particle Radius**: [Your value]
+
+### Performance Metrics
+
+| GPU | Particle Count | Avg. FPS | Frame Time (ms) | Throughput (collisions/sec) |
+|-----|---------------|----------|-----------------|----------------------------|
+| **NVIDIA RTX 3050** (Dedicated) | 40,000 | **270** | ~3.7 ms | [Calculate: 40K × collisions] |
+| **Intel UHD Graphics** (Integrated) | 40,000 | **100** | ~10.0 ms | [Calculate] |
+| **NVIDIA RTX 3050** | 20,000 | **~500+** | ~2.0 ms | - |
+| **Intel UHD Graphics** | 20,000 | **~180** | ~5.5 ms | - |
+
+### Performance Scaling
+

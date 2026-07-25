@@ -19,7 +19,7 @@ An **OpenGL** based GPU accelerated 2D particle (circles) simulator which simula
 *   **GPU Optimisation** To make use of dedicated graphics card, `src/gpu_config.cpp` must be added to `add_executable` list in `CMakeLists.txt`.
 
 ##  Architecture Document
-To understand the architecture of this project, read the  **[Architecture Document](https://github.com/Arpit-Shinde/Collision-Sim)**.
+To understand the architecture of this project, read the  **[Architecture Document](https://arpit-shinde.github.io/Collision-Sim/)**.
 
 
 ## How to Build
@@ -27,7 +27,7 @@ To understand the architecture of this project, read the  **[Architecture Docume
 Click the green `Code` button and copy the HTTPS URL. Open a folder in VS Code and run the following command in the terminal:
 
 ```bash
-git clone [https://github.com/Arpit-Shinde/Collision-Sim.git](https://arpit-shinde.github.io/Collision-Sim/)
+git clone [https://github.com/Arpit-Shinde/Collision-Sim.git](https://github.com/Arpit-Shinde/Collision-Sim.git)
 ```
 
 This will clone the repository. Once done, open the `Collision-Sim` folder in VS Code (`Ctrl+K+O`).

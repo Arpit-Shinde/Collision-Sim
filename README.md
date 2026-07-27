@@ -7,8 +7,6 @@ An **OpenGL** based GPU accelerated 2D particle (circles) simulator which simula
 *   **Color Coding:** Particles are mapped to a color based on their speed
 *   **Configurable Simulation Parameters:** Allows user to configure number of particles, radius of particles, coefficient of restitution and the resolution of particle.
 
-*Note : The data can be configured in* `app/main.cpp`
-
 ## Demo Videos
 
 <table>

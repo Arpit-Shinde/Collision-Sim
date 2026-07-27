@@ -46,17 +46,51 @@ key takeaways : 1. assigning struct data to variables in glsl is not as same as 
 #include <fstream>
 #include <sstream>
 
-int resolution = 150; //resolution for the circle. more res, more round.
-int n = 20; //number of particles = n*n.
-float radius = 1/((float) 2*n); //recommended radius = 1/n for compact square packing
-float restitution = 1.0f;
-int g = int(1/radius); //number of cells = g*g
-std::vector <float> color = {1.0,0.0,1.0};
-int max_particles_per_cell = (n*n)/(g*g) + 100;
-float max_velocity = 10/(float) n;
+//resolution for the circle. more res, more round.
+ //number of particles = n*n.
+
 
 int main() {
+
+    std::cout << "==================================================\n";
+    std::cout << " Collision Simulator v4.0\n";
+    std::cout << "==================================================\n";
+    std::cout<< " Maximum number of particles supported on integrated graphics card : 65025\nTo go beyond, consider changing renderer\n";
+    std::cout << "--------------------------------------------------\n";
+    std::cout << " Simulation Info:\n";
+    
+    
+    int n=10;
+    int resolution =15; 
+    float restitution = 1.0f;
+    std::cout << " - Number of particles: " ;
+    std::cin>>n;
+    n = sqrt(n);
+    std::cout << " - Resolution (minimum 3) : ";
+    std::cin>>resolution;
+    std::cout<<" - Coefficient of Restitution : ";
+    std::cin>>restitution;
+    std::cout << "--------------------------------------------------\n";
+    std::cout << " Controls:\n";
+    std::cout << " - [ESC] to Exit\n";
+    std::cout << "==================================================\n";
+    
+
+    float radius = 1/((float) 2*n); //recommended radius = 1/n for compact square packing
+    
+    int g = int(1/radius); //number of cells = g*g
+    std::vector <float> color = {1.0,0.0,1.0};
+    int max_particles_per_cell = (n*n)/(g*g) + 100;
+    float max_velocity = 10/(float) n;
+
     GLFWwindow* window = init_window();
+
+    std::cout << " System Info:\n";
+    std::cout << " - OpenGL Version: " << glGetString(GL_VERSION) << "\n";
+    std::cout << " - Renderer: " << glGetString(GL_RENDERER) << "\n";
+    std::cout << "--------------------------------------------------\n";
+    std::cout<<"Starting Simulation for "<<n*n<<" number of particles (rounded up to nearest perfect square)";
+    std::cout << "--------------------------------------------------\n";
 
     unsigned int shaderProgram = linkShaders();
 
@@ -118,27 +152,12 @@ int main() {
     int frames = 0;
     int count=0; //to track average fps
     int fps = 0;
-
-    std::cout << "==================================================\n";
-    std::cout << " Collision Simulator v4.0\n";
-    std::cout << "--------------------------------------------------\n";
-    std::cout << " System Info:\n";
-    std::cout << " - OpenGL Version: " << glGetString(GL_VERSION) << "\n";
-    std::cout << " - Renderer: " << glGetString(GL_RENDERER) << "\n";
-    std::cout << "--------------------------------------------------\n";
-    std::cout << " Simulation Info:\n";
-    std::cout << " - Number of particles: " << n*n << "\n";
-    std::cout << " - Resolution: " << resolution << "\n";
-    std::cout << "--------------------------------------------------\n";
-    std::cout << " Controls:\n";
-    std::cout << " - [ESC] to Exit\n";
-    std::cout << "==================================================\n";
     
     while (!glfwWindowShouldClose(window)){
 
-        if (count==60){ //stop animation after 60
-            break;
-        }
+        // if (count==60){ //stop animation after 60
+        //     break;
+        // }
 
         processinput(window);
 

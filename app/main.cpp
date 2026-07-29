@@ -34,17 +34,21 @@ key takeaways : 1. assigning struct data to variables in glsl is not as same as 
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "shader.h"
-#include "engine.h"
-#include <iostream>
+
+// GLM Math Library
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <bits/stdc++.h>
-#include <random>
+
+// Standard C++ Libraries
+#include <iostream>
+#include <vector>
+#include <cmath>   // Required for sqrt()
+
+// Local Project Headers
+#include "shader.h"
+#include "engine.h"
 #include "geometry.h"
-#include <fstream>
-#include <sstream>
 
 //resolution for the circle. more res, more round.
  //number of particles = n*n.
@@ -225,9 +229,6 @@ int main() {
     
     
     glfwTerminate();
-
-    int garbage;
-    std::cin>>garbage;
 
 
     return 0;

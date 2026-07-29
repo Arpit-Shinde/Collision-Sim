@@ -1,0 +1,32 @@
+name: Build and Release
+
+on:
+  push:
+    tags: ['v*'] # This runs only when you tag a commit like 'v1.0'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # We need this to ensure CPack finds libraries if you use them
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build with CMake
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+          
+      - name: Create Installer
+        run: |
+          cd build
+          cpack -C Release
+          
+      - name: Upload Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/*.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

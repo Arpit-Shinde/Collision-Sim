@@ -1,36 +1,25 @@
 cmake_minimum_required(VERSION 3.10)
-project(Collision_Sim VERSION 1.0.0 LANGUAGES CXX)
+project(Collision_Sim)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 1. Find dependencies using vcpkg
-find_package(glfw3 CONFIG REQUIRED)
-find_package(OpenGL REQUIRED)
+include_directories(include)
 
-# 2. Add your source files
+link_directories(lib)
+
 add_executable(Collision_Sim 
     app/main.cpp 
     src/engine.cpp
     src/geometry.cpp
     src/shader.cpp
     src/glad.c
+    # src/gpu_config.cpp # keep it as it is if testing on integrated graphics card is required else uncomment this whole line if testing on dedicated graphics card is required
 )
 
-# 3. Include headers and link libraries
-target_include_directories(Collision_Sim PRIVATE include)
-target_link_libraries(Collision_Sim PRIVATE glfw OpenGL::GL)
-
-# 4. Installer Configuration (CPack)
-include(InstallRequiredSystemLibraries)
-
-set(CPACK_PACKAGE_NAME "CollisionSim")
-set(CPACK_PACKAGE_VENDOR "YourName")
-set(CPACK_PACKAGE_VERSION "1.0.0")
-
-if(WIN32)
-    set(CPACK_GENERATOR "WIX") # Generates an MSI installer
-endif()
-
-install(TARGETS Collision_Sim DESTINATION bin)
-include(CPack)
+# need opengl32 for Windows, and glfw3 for GLFW
+target_link_libraries(Collision_Sim 
+    glfw3 
+    opengl32
+    gdi32
+)

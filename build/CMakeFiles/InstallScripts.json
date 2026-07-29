@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/codes/opengl/collision_git/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,3 @@
+C:/codes/opengl/collision_git/build/CMakeFiles/Collision_Sim.dir
+C:/codes/opengl/collision_git/build/CMakeFiles/edit_cache.dir
+C:/codes/opengl/collision_git/build/CMakeFiles/rebuild_cache.dir

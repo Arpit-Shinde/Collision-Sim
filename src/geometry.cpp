@@ -76,7 +76,7 @@ std::vector <Velocity> generate_random_velocities(float max, int n){
     std::uniform_real_distribution <float> random_vel(-max,max); //set the initial random velocities here
 
     for (int i = 0;i<n*n;i++){
-        velocities.push_back({random_vel(gen), random_vel(gen),0.0f,max});
+        velocities.push_back({random_vel(gen), random_vel(gen), 0.0f, static_cast<float>(max * sqrt(2))});
     }
 
     return velocities;

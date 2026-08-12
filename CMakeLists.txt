@@ -23,3 +23,13 @@ target_link_libraries(Collision_Sim
     opengl32
     gdi32
 )
+# uncomment the below section for creating a standalone .exe file 
+# install(TARGETS Collision_Sim RUNTIME DESTINATION bin)
+
+# # --- CPack ZIP Configuration ---
+# set(CPACK_GENERATOR "ZIP")
+# set(CPACK_PACKAGE_NAME "CollisionSim")
+# set(CPACK_PACKAGE_VERSION "1.0.0")
+
+# include(CPack)
+

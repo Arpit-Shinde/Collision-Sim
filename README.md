@@ -26,6 +26,9 @@ An **OpenGL** based GPU accelerated 2D particle (circles) simulator which simula
 
 > *Note: The frame rates observed in the demo videos are lower than the actual performance benchmarks due to the overhead of the screen recording software.*
 
+## Try it Out!
+Find the zip files containing .exe files for windows in Releases Section. 
+
 ## Performance Benchmarks
 
 **System & Simulation Constants**

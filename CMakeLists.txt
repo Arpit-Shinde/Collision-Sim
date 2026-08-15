@@ -14,7 +14,7 @@ add_executable(Collision_Sim
     src/geometry.cpp
     src/shader.cpp
     src/glad.c
-    # src/gpu_config.cpp # keep it as it is if testing on integrated graphics card is required else uncomment this whole line if testing on dedicated graphics card is required
+    src/gpu_config.cpp # keep it as it is if testing on integrated graphics card is required else uncomment this whole line if testing on dedicated graphics card is required
 )
 
 # need opengl32 for Windows, and glfw3 for GLFW
@@ -23,13 +23,18 @@ target_link_libraries(Collision_Sim
     opengl32
     gdi32
 )
+
+# Force static linking on Windows so users don't get missing DLL errors
+if(WIN32)
+    target_link_options(Collision_Sim PRIVATE -static-libgcc -static-libstdc++ -static)
+endif()
+
 # uncomment the below section for creating a standalone .exe file 
-# install(TARGETS Collision_Sim RUNTIME DESTINATION bin)
+install(TARGETS Collision_Sim RUNTIME DESTINATION bin)
 
-# # --- CPack ZIP Configuration ---
-# set(CPACK_GENERATOR "ZIP")
-# set(CPACK_PACKAGE_NAME "CollisionSim")
-# set(CPACK_PACKAGE_VERSION "1.0.0")
+# --- CPack ZIP Configuration ---
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_NAME "CollisionSim")
+set(CPACK_PACKAGE_VERSION "1.0.0")
 
-# include(CPack)
-
+include(CPack)

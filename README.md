@@ -176,5 +176,6 @@ cmake --build .
 ### Running the Project
 Once the build is complete, you will find the executable `Collision_Sim.exe` inside your build directory. You can launch it by double-clicking the file, or run it directly from your terminal.
 
-
+## Future Work
+Planning to extend it to n-body simulator
 
